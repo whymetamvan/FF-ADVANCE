@@ -1,0 +1,48 @@
+
+name: Download Free Fire Advance APK
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download APK
+        run: |
+          URL="https://freefiremobile-a.akamaihd.net/advance/package/FFadv_68.56.0_1112_ID_advffgogo.apk"
+
+          curl -fL --retry 3 \
+            "$URL" \
+            -H "Accept: */*" \
+            -H "Referer: https://ff-advance.ff.garena.com/" \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/157.0.0.0 Safari/537.36" \
+            -o FFadv.apk
+
+      - name: Validate APK
+        run: |
+          if [ ! -s FFadv.apk ]; then
+            echo "Download failed or file is empty"
+            exit 1
+          fi
+
+          file FFadv.apk
+          sha256sum FFadv.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ff-advance-68.56.0
+          name: Free Fire Advance 68.56.0
+          body: |
+            Automatically downloaded Free Fire Advance APK.
+          files: FFadv.apk
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
